@@ -106,17 +106,7 @@ if task, exists := scheduler.Get("data-sync"); exists {
 
 ## ⚙️ 配置
 
-### 环境变量配置
-
-```bash
-export REDIS_ADDR="localhost:6379"        # Redis 地址
-export REDIS_PASSWORD="yourpassword"        # Redis 密码
-export REDIS_DB="0"                         # Redis 数据库
-export LOCK_EXPIRY="30s"                    # 锁过期时间
-export LOCK_PREFIX="myapp:lock:"            # 锁前缀
-```
-
-### 代码配置
+### 配置结构
 
 ```go
 import "time"
@@ -131,55 +121,6 @@ cfg := redCorn.Cfg{
         Prefix: "custom:lock:",
         Expiry: 60 * time.Second,
     },
-}
-```
-
-## 🔧 环境变量配置
-
-虽然代码中没有内置的 `LoadConfig()` 函数，但你可以轻松地自己实现：
-
-```go
-import (
-    "os"
-    "strconv"
-    "time"
-)
-
-func LoadConfig() redCorn.Cfg {
-    // Redis配置
-    redisDB := 0
-    if db := os.Getenv("REDIS_DB"); db != "" {
-        if parsedDB, err := strconv.Atoi(db); err == nil {
-            redisDB = parsedDB
-        }
-    }
-    
-    // 锁过期时间
-    lockExpiry := 30 * time.Second
-    if expiry := os.Getenv("LOCK_EXPIRY"); expiry != "" {
-        if parsedExpiry, err := time.ParseDuration(expiry); err == nil {
-            lockExpiry = parsedExpiry
-        }
-    }
-    
-    return redCorn.Cfg{
-        RedisCfg: redCorn.RedisCfg{
-            Addr:     getEnv("REDIS_ADDR", "localhost:6379"),
-            Password: getEnv("REDIS_PASSWORD", ""),
-            DB:       redisDB,
-        },
-        LockCfg: redCorn.LockCfg{
-            Prefix: getEnv("LOCK_PREFIX", "redcorn:lock:"),
-            Expiry: lockExpiry,
-        },
-    }
-}
-
-func getEnv(key, defaultValue string) string {
-    if value := os.Getenv(key); value != "" {
-        return value
-    }
-    return defaultValue
 }
 ```
 
@@ -263,16 +204,6 @@ func (ts *TaskScheduler) GetAll() map[string]TaskSchedule
 ## 📝 Cron 表达式
 
 支持标准 6 位 Cron 表达式（包含秒），使用 [robfig/cron](https://github.com/robfig/cron) 库：
-
-| 表达式 | 含义 |
-|--------|------|
-| `*/10 * * * * *` | 每 10 秒 |
-| `0 */5 * * * *` | 每 5 分钟 |
-| `0 0 * * * *` | 每小时 |
-| `0 0 2 * * *` | 每天 2 点 |
-| `0 30 9 * * 1-5` | 工作日 9:30 |
-
-**注意：** 不支持 `?` 符号，请使用标准的 `*` 符号。
 
 ## 🔒 分布式锁机制
 

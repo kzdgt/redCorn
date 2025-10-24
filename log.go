@@ -26,39 +26,39 @@ type Logger interface {
 }
 
 // DefaultLogger 默认日志实现
-type DefaultLogger struct {
+type defaultLogger struct {
 	logger *log.Logger
 }
 
 // NewDefaultLogger 创建默认日志器
-func NewDefaultLogger() *DefaultLogger {
-	return &DefaultLogger{
+func newDefaultLogger() *defaultLogger {
+	return &defaultLogger{
 		logger: log.New(os.Stdout, "[RedCorn] ", log.LstdFlags|log.Lshortfile),
 	}
 }
 
 // Debug 调试日志
-func (d *DefaultLogger) Debug(args ...interface{}) {
+func (d *defaultLogger) Debug(args ...interface{}) {
 	d.logger.Println("[DEBUG]", fmt.Sprint(args...))
 }
 
 // Info 信息日志
-func (d *DefaultLogger) Info(args ...interface{}) {
+func (d *defaultLogger) Info(args ...interface{}) {
 	d.logger.Println("[INFO]", fmt.Sprint(args...))
 }
 
 // Warn 警告日志
-func (d *DefaultLogger) Warn(args ...interface{}) {
+func (d *defaultLogger) Warn(args ...interface{}) {
 	d.logger.Println("[WARN]", fmt.Sprint(args...))
 }
 
 // Error 错误日志
-func (d *DefaultLogger) Error(args ...interface{}) {
+func (d *defaultLogger) Error(args ...interface{}) {
 	d.logger.Println("[ERROR]", fmt.Sprint(args...))
 }
 
 // Fatal 致命错误日志
-func (d *DefaultLogger) Fatal(args ...interface{}) {
+func (d *defaultLogger) Fatal(args ...interface{}) {
 	d.logger.Println("[FATAL]", fmt.Sprint(args...))
 	os.Exit(1)
 }

@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"sync"
 	"time"
 
 	goredislib "github.com/go-redis/redis/v8"
@@ -36,11 +35,11 @@ type DistributedTaskManager struct {
 	redisClient *goredislib.Client
 	redsync     *redsync.Redsync
 	cron        *cron.Cron
-	wg          sync.WaitGroup
-	ctx         context.Context
-	cancel      context.CancelFunc
-	cfg         Cfg
-	log         Logger
+	//wg          sync.WaitGroup
+	ctx    context.Context
+	cancel context.CancelFunc
+	cfg    Cfg
+	log    Logger
 }
 
 // NewDistributedTaskManager 创建分布式任务管理器
@@ -50,7 +49,7 @@ func NewDistributedTaskManager(cfg Cfg) (*DistributedTaskManager, error) {
 	// 设置日志器
 	logger := cfg.Logger
 	if logger == nil {
-		logger = NewDefaultLogger()
+		logger = newDefaultLogger()
 	}
 
 	// 创建Redis客户端
@@ -157,7 +156,7 @@ func (dtm *DistributedTaskManager) Stop() {
 	dtm.cancel()
 
 	// 等待所有任务完成
-	dtm.wg.Wait()
+	//dtm.wg.Wait()
 
 	// 关闭Redis连接
 	if err := dtm.redisClient.Close(); err != nil {

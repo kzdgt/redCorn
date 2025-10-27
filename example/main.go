@@ -15,7 +15,7 @@ func main() {
 
 	// 加载配置
 	config := redCorn.Cfg{}
-	config.RedisCfg.Addr = "localhost:6379"
+	config.RedisCfg.Addrs = []string{"localhost:6379"}
 	config.RedisCfg.Password = "Qnzs@123"
 	config.LockCfg.Prefix = "myapp:lock:"
 	config.LockCfg.Expiry = 60 * time.Second

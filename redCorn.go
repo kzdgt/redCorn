@@ -14,15 +14,9 @@ import (
 
 // Cfg 配置结构体
 type Cfg struct {
-	RedisCfg RedisCfg
+	RedisCfg goredislib.UniversalOptions
 	LockCfg  LockCfg
 	Logger   Logger // 自定义日志器，可选
-}
-
-type RedisCfg struct {
-	Addr     string
-	Password string
-	DB       int
 }
 
 type LockCfg struct {
@@ -32,14 +26,13 @@ type LockCfg struct {
 
 // DistributedTaskManager 分布式任务管理器
 type DistributedTaskManager struct {
-	redisClient *goredislib.Client
+	redisClient goredislib.UniversalClient
 	redsync     *redsync.Redsync
 	cron        *cron.Cron
-	//wg          sync.WaitGroup
-	ctx    context.Context
-	cancel context.CancelFunc
-	cfg    Cfg
-	log    Logger
+	ctx         context.Context
+	cancel      context.CancelFunc
+	cfg         Cfg
+	log         Logger
 }
 
 // NewDistributedTaskManager 创建分布式任务管理器
@@ -53,22 +46,17 @@ func NewDistributedTaskManager(cfg Cfg) (*DistributedTaskManager, error) {
 	}
 
 	// 创建Redis客户端
-	client := goredislib.NewClient(&goredislib.Options{
-		Addr:     cfg.RedisCfg.Addr,
-		Password: cfg.RedisCfg.Password,
-		DB:       cfg.RedisCfg.DB,
-	})
+	client := goredislib.NewUniversalClient(&cfg.RedisCfg)
 
 	// 测试Redis连接
 	if err := client.Ping(ctx).Err(); err != nil {
 		cancel()
-		return nil, fmt.Errorf("failed to connect to RedisCfg: %v", err)
+		return nil, fmt.Errorf("failed to connect to Redis: %v", err)
 	}
 
 	// 创建Redsync连接池
 	pool := goredis.NewPool(client)
 	rs := redsync.New(pool)
-
 	// 创建Cron实例
 	c := cron.New(cron.WithSeconds()) // 支持秒级定时
 
@@ -167,7 +155,7 @@ func (dtm *DistributedTaskManager) Stop() {
 }
 
 // GetRedisClient 获取Redis客户端（供外部使用）
-func (dtm *DistributedTaskManager) GetRedisClient() *goredislib.Client {
+func (dtm *DistributedTaskManager) GetRedisClient() goredislib.UniversalClient {
 	return dtm.redisClient
 }
 
